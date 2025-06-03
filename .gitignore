@@ -1,0 +1,18 @@
+
+#folders
+demo
+rough
+
+threads_db.db
+logs
+
+venv
+# Ignore all .log files
+*.log
+
+# Ignore the node_modules directory
+node_modules/
+
+# Ignore environment files
+.env
+
