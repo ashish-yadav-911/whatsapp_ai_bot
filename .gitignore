@@ -2,11 +2,15 @@
 #folders
 demo
 rough
-
+test.py
 threads_db.db
 logs
-
+test1.py
+test_state_manaeger.py
+data
 venv
+.pyc
+.DS_Store
 # Ignore all .log files
 *.log
 

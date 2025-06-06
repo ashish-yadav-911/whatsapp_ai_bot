@@ -1012,8 +1012,8 @@ def create_or_update_assistant():
 # Transição para o nó Agendar Compromisso se o usuário quiser agendar, mas não mencionar isso no chat
     """
 
-    name = "HR Helper" # Or change this to something like "Ana - Virtual Receptionist"
-    model = "gpt-4o" # Or another suitable model
+    name = "drinae" # Or change this to something like "Ana - Virtual Receptionist"
+    model = "gpt-4o-mini" # Or another suitable model
 
     tools_list = tool_definitions
     # if you need file search, uncomment below and ensure vector_store_ids are handled
