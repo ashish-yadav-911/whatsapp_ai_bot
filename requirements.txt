@@ -2,4 +2,5 @@ openai
 Flask
 python-dotenv
 requests
-dateutil
+python-dateutil
+pytz
