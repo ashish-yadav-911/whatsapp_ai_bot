@@ -11,4 +11,4 @@ logger.info("Application starting...")
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=Config.LOG_LEVEL, port=Config.PORT)
+    app.run(debug=Config.LOG_LEVEL, host="0.0.0.0" port=Config.PORT)
