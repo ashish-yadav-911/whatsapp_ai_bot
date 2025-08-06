@@ -561,20 +561,20 @@ def get_access_token(doctor_id: int, clinic_id: int, api_key: str) -> Dict[str, 
     except ValueError as e: logger.error(f"[Error fetching token/availability] {e}") ; return None
     except Exception as e: logger.error(f"[Error fetching token/availability] An unexpected error occurred: {e}") ; return None
 
-def schedule_meeting(access_token: str, name: str, phone: str, email: str, date_time_iso: str, procedure_id: int, health_operator_id: int) -> Dict[str, Any] | None:
+def schedule_meeting(access_token: str, name: str, phone: str, email: str, date: str, procedure_id: int, health_operator_id: int) -> Dict[str, Any] | None:
     if not Config.CRM_API_BASE_URL or not access_token:
         logger.error("Scheduling API base URL or access token missing for schedule request.")
         return None
-    if not name or not phone or not email or not date_time_iso or procedure_id is None or health_operator_id is None:
-         logger.error(f"Missing required scheduling data: Name={name}, Phone={phone}, Email={email}, Date={date_time_iso}, Procedure={procedure_id}, Operator={health_operator_id}")
+    if not name or not phone or not email or not date or procedure_id is None or health_operator_id is None:
+         logger.error(f"Missing required scheduling data: Name={name}, Phone={phone}, Email={email}, Date={date}, Procedure={procedure_id}, Operator={health_operator_id}")
          return None
     url = f"{Config.CRM_API_BASE_URL}/appointment/create/"
     headers = { 'Authorization': f'Bearer {access_token}', 'Content-Type': 'application/json', }
     payload = {
         "name": name, "phone": phone, "email": email,
-        "procedure": str(procedure_id),
-        "health_operator": str(health_operator_id),
-        "date": date_time_iso
+        "procedure": procedure_id,
+        "health_operator": health_operator_id,
+        "date": date
     }
     logger.info(f"Attempting to schedule meeting with payload: {payload}")
     try:
@@ -714,6 +714,7 @@ def handle_schedule_meeting_with_dr_inae(user_id: str, name: str, email: str, ph
         logger.error(f"User {user_id}: Failed to get access token or availability data.")
         return "Error: Could not get authorization or check availability for scheduling. Please try again."
     access_token = token_availability_data.get('access_token')
+    logger.info(f"access token recived {access_token}")
     available_appointments = token_availability_data.get('appointments', [])
     if not access_token: logger.error(f"User {user_id}: Access token missing from availability response data."); return "Error: Could not get authorization token for scheduling."
     if not available_appointments: logger.warning(f"User {user_id}: No available appointment slots returned by the API."); return "Sorry, there are currently no available appointment slots with Dra. Inaê."
@@ -735,7 +736,7 @@ def handle_schedule_meeting_with_dr_inae(user_id: str, name: str, email: str, ph
         return f"Desculpe, o horário '{datetime}' não está disponível. Por favor, escolha entre estes horários disponíveis: {available_dates_str}"
     date_time_iso = format_datetime_for_api(matched_dt_object)
     if not date_time_iso: logger.error(f"User {user_id}: Failed to format matched datetime object {matched_dt_object} for API."); return "Error: Could not format the chosen appointment time for scheduling."
-    scheduling_result = schedule_meeting( access_token=access_token, name=final_name, phone=final_phone, email=email, date_time_iso=date_time_iso, procedure_id=Config.PROCEDURE_ID, health_operator_id=Config.HEALTH_OPERATOR_ID )
+    scheduling_result = schedule_meeting( access_token=access_token, name=final_name, phone=final_phone, email=email, date=date_time_iso, procedure_id=Config.PROCEDURE_ID, health_operator_id=Config.HEALTH_OPERATOR_ID )
     if scheduling_result:
         confirmation_details = scheduling_result.get("appointment_id", "N/A") # ADJUST THIS KEY NAME
         logger.info(f"User {user_id}: Meeting scheduled successfully. API Response: {scheduling_result}")

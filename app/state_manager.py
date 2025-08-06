@@ -82,7 +82,7 @@ class StateManager:
             # Open in write mode, create if not exists, use writeback
             with shelve.open(PROCESSED_MESSAGES_SHELVE_FILE, 'c', writeback=True) as shelf:
                 # Store the message_id. The value can be anything, e.g., a timestamp.
-                shelf[message_id] = datetime.now() # Store timestamp of processing
+                shelf[message_id] = datetime.datetime.now() # Store timestamp of processing
 
             logger.info(f"Added message ID {message_id} to processed messages shelve.")
         except Exception as e:

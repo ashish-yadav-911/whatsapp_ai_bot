@@ -229,7 +229,7 @@
 # #     # If you are just adding function calling for now and not using file search yet:
 # #     tool_resources_config = {} # No tool resources needed if only using function calling
 
-# #     # If you ARE using file search with a specific vector store:
+# #     # If  using file search with a specific vector store:
 # #     # Replace 'vs_YOUR_VECTOR_STORE_ID' with your actual Vector Store ID
 # #     # tool_resources_config = {"file_search": {"vector_store_ids": ["vs_YOUR_VECTOR_STORE_ID"]}}
 # #     # Ensure the file_search tool is also in the tools_list above
@@ -932,7 +932,7 @@ def create_or_update_assistant():
 
 
 # ##Note
-# Today's date is : 12/04/2025  <-- THIS WILL BE OVERRIDDEN DYNAMICALLY IN RUN.PY
+
 
 # ## Style Guidelines
 # Be Concise: Respond succinctly, addressing one topic at a time.
