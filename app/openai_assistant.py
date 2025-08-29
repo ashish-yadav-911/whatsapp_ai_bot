@@ -614,28 +614,18 @@ def parse_user_datetime(datetime_str: str) -> datetime | None:
     except Exception as e: logger.error(f"An unexpected error occurred during datetime parsing: {e}") ; return None
 
 # format_datetime_for_api (Keep as is, assuming locale is set globally)
-def format_datetime_for_api(dt_object: datetime) -> str | None:
-    """
-    Formats a datetime object (assumed to be local time) into 'YYYY-MM-DDTHH:mm:ss.000Z' (UTC).
-    Correctly handles timezone conversion using clinic's local timezone.
-    Assumes locale is set globally for strftime if needed elsewhere.
-    """
+def format_datetime_for_api(dt: datetime) -> str:
+    """Ensure datetime is UTC and formatted with milliseconds + Z (ISO8601)."""
     try:
-        # Use the local timezone (Adjust this to your clinic's timezone)
-        local_tz = pytz.timezone('America/Sao_Paulo')
-        # Make the naive datetime timezone aware in the local timezone
-        dt_object_local = local_tz.localize(dt_object)
-        # Convert the local datetime to UTC
-        utc_dt_object = dt_object_local.astimezone(pytz.utc)
+        if dt.tzinfo is None:  # naive → localize
+            dt = pytz.utc.localize(dt)
+        else:  # already tz-aware → normalize
+            dt = dt.astimezone(pytz.utc)
 
-        # Format to YYYY-MM-DDTHH:mm:ss.000Z
-        # Use utcfromtimestamp if starting from a timestamp, but here we have a datetime object
-        formatted_str = utc_dt_object.strftime('%Y-%m-%dT%H:%M:%S.000Z')
-        logger.info(f"Formatted datetime object {dt_object} (Local assumed) to API string {formatted_str} (UTC)")
-        return formatted_str
-
-    except Exception as tz_e:
-        logger.error(f"Error during timezone conversion and formatting for API: {tz_e}. Cannot format datetime correctly.")
+        # Format: YYYY-MM-DDTHH:mm:ss.SSSZ
+        return dt.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    except Exception as e:
+        logger.error(f"Error during timezone conversion and formatting for API: {e}")
         return None
 
 # find_matching_appointment (Keep as is, assuming locale is set globally)
@@ -770,6 +760,7 @@ def handle_transfer_chat_to_whatsapp(user_id: str, user_name: str = None, conver
         f"Ok, vou transferir você para um agente humano. Você pode entrar em contato diretamente pelo WhatsApp no número {transfer_number}. "
         "Por favor, forneça seu nome e um breve resumo do seu problema para que a equipe possa ajudar você mais rápido."
     )
+    
     user_msg_success = send_message(recipient_id=user_id, text=user_transfer_message)
 
     if not user_msg_success:

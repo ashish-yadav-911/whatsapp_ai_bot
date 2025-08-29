@@ -30,6 +30,9 @@ def process_whatsapp_message(from_number, text_content, whatsapp_message_id):
     """
     # --- Persistent Deduplication Check (FIRST STEP) ---
     # Use state_manager to check/add the message ID
+
+    logger.info(f"in process whatsapp message function")
+
     if state_manager.has_processed_message(whatsapp_message_id):
         logger.info(f"Message ID {whatsapp_message_id} already processed (persistent check). Skipping.")
         return # Exit the background task if already processed
@@ -106,7 +109,17 @@ def process_whatsapp_message(from_number, text_content, whatsapp_message_id):
 
             # If we successfully processed (either completed or failed after starting run), break the retry loop
             if run and run.status in ['completed', 'failed', 'expired', 'cancelled']: # Break on any terminal status
-                break # Exit the retry loop after processing one run
+                if run.status == "completed":
+                    try:
+                        assistant_response = get_assistant_response(thread_id,run.id)
+                        if assistant_response:
+                            send_message(from_number, assistant_response)
+                            logger.info(f"Sent assistant response to {from_number}: {assistant_response}")
+                        else:
+                            logger.warning(f"No assistant response found for thread {thread_id}")
+                    except Exception as e:
+                        logger.error(f"Error sending assistant response to {from_number}: {e}")
+                break
 
             # If run is still in_progress or requires_action after run_assistant_with_tool_handling returns,
             # it means the timeout was hit or there was an unhandled state.
@@ -138,7 +151,7 @@ def webhook_get():
 def webhook_post():
     try:
         data = request.get_json()
-        # logger.debug(json.dumps(data, indent=2))
+        #logger.info(f"""User Query is ,{json.dumps(data, indent=2)}""")
 
         if data and 'object' in data and data['object'] == 'whatsapp_business_account':
             for entry in data.get('entry', []):
